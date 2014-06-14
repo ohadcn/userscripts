@@ -73,7 +73,7 @@ generate=function(){
                         var startHour=Number(hours[time].substr(6,2));
                         var endHour=Number(hours[time].substr(0,2));
                         for(var hour=startHour;hour<=endHour;hour++){
-	       	                document.getElementById(day+hour).innerHTML+="<div"+(print?"":" style=\"background-color:"+id%10+id+";color:white\"")+">"+places[time]+" "+tds[6].innerHTML.replace(/<.*>/g,"")+" "+idToText[id]+"<hr></div>";
+	       	                document.getElementById(day+hour).innerHTML+="<div"+(print?"":" style=\"background-color:#"+id%10+id+";color:white\"")+">"+places[time]+" "+tds[6].innerHTML.replace(/<.*>/g,"")+" "+idToText[id]+"<hr></div>";
 		                }
 		            }
                 }
