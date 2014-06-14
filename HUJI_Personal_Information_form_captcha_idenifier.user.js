@@ -8,6 +8,8 @@
 // @include        https://www.huji.ac.il/dataj/controller/stu/?
 // @require        https://code.jquery.com/jquery-2.0.3.min.js
 // @grant          GM_xmlhttpRequest
+// @updateURL      http://www.cs.huji.ac.il/~omershe/HUJI_Personal_Information_form_captcha_idenifier.meta.js
+// @downloadURL    http://www.cs.huji.ac.il/~omershe/HUJI_Personal_Information_form_captcha_idenifier.user.js
 // @run-at         document-end
 // ==/UserScript==
 
@@ -56,10 +58,10 @@ img.onload = function() {
 			} else {
 				if (/^[0-9\ ]+$/.test(value)) {
 					$("#inputCaptcha").val(value);
-					showError("שים לב: המספר פוענח חלקית");
+					showError("׳©׳™׳� ׳�׳‘: ׳”׳�׳¡׳₪׳¨ ׳₪׳•׳¢׳ ׳— ׳—׳�׳§׳™׳×");
 				} else {
 					$("#inputCaptcha").val("");
-					showError("שגיאה בפענוח המספר");
+					showError("׳©׳’׳™׳�׳” ׳‘׳₪׳¢׳ ׳•׳— ׳”׳�׳¡׳₪׳¨");
 				}
 				$("#serverResponse").show();
 			}
@@ -69,7 +71,7 @@ img.onload = function() {
 		onerror: function() {
 			$("#retry").click(unsafeWindow.retryCaptcha);
 			$(img).click(unsafeWindow.retryCaptcha);
-			showError("שגיאה כללית");
+			showError("׳©׳’׳™׳�׳” ׳›׳�׳�׳™׳×");
 		},
 		timeout: 7 * 1000
 	});
@@ -81,7 +83,7 @@ retry.css( {
 	"direction": "rtl",
 	"text-decoration": "underline",
 	"cursor": "pointer"
-	}).attr("id", "retry").click(unsafeWindow.retryCaptcha).html("נסה שוב");
+	}).attr("id", "retry").click(unsafeWindow.retryCaptcha).html("׳ ׳¡׳” ׳©׳•׳‘");
 var messageDiv = $(document.createElement("div")).attr("id", "serverResponse").css({"background-color":"yellow"}).hide();
 
 div.append(retry).append(messageDiv);
@@ -94,3 +96,4 @@ $("a.jp-play").attr("tabindex", 100);
 $("#inputCaptcha").attr("tabindex", 3);
 retry.attr("tabindex", 4);
 $("input[type=submit]").attr("tabindex", 5);
+

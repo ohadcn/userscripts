@@ -1,5 +1,5 @@
 To use those scripts you need a browser addone that can handle user scripts
 the most common one is called greasemonkey and it run on firefox browser
-for chrome users i advice to use tampermonkey
+in chrome i prefer to use tampermonkey
 opera has it's own, built-in support for userscripts
 more information here: http://userscripts.org/about/installing
