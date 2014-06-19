@@ -9,7 +9,7 @@
 // @include        https://www.huji.ac.il/dataj/controller/auth/stu*
 // @require        https://code.jquery.com/jquery-2.0.3.min.js
 // @grant          GM_xmlhttpRequest
-// @updateURL      http://www.cs.huji.ac.il/~omershe/HUJI_Personal_Information_form_captcha_idenifier.meta.js
-// @downloadURL    http://www.cs.huji.ac.il/~omershe/HUJI_Personal_Information_form_captcha_idenifier.user.js
+// @updateURL      https://raw.githubusercontent.com/ohadcn/userscripts/master/HUJI_Personal_Information_form_captcha_idenifier.meta.js
+// @downloadURL    https://raw.githubusercontent.com/ohadcn/userscripts/master/HUJI_Personal_Information_form_captcha_idenifier.user.js
 // @run-at         document-end
 // ==/UserScript==
