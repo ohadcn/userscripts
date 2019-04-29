@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           Knesset Agendas Editor Addon
 // @description    Help Knesset Agendas Editors And Reviewers
-// @version        1.1
+// @version        1.2
 // @namespace      ohadcn
 // @author         Ohad Cohen
 // @match          https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx*
@@ -56,6 +56,7 @@ function btn(text, style) {
 function sendData(ev) {
     ev.preventDefault();
   //https://docs.google.com/spreadsheets/d/1c4PDTmDIn2M2tsSjK9LbrtXlhbHhRowdAMJk9aAHID8/edit#gid=0
+  var lawName = $(".LawDarkBrownTitleH2").text();
   var billNum = $("strong:contains(מספר הצ\"ח)").parent().next().text().trim();
   var derug = $("#derug").val();
   var initiators = $("strong:contains(חברי הכנסת היוזמים)").parent().parent().next().text().trim().split(", ");
@@ -65,9 +66,9 @@ function sendData(ev) {
   }
   gapi.client.sheets.spreadsheets.values.append({
     spreadsheetId: '1c4PDTmDIn2M2tsSjK9LbrtXlhbHhRowdAMJk9aAHID8',
-    range: 'laws!B2',
+    range: 'laws!A2',
     resource: {
-      values: [[billNum, derug,
+      values: [[lawName, billNum, derug,
                 location.href, description.value,
                 /* comment */, /* is voted? */,/* is passed? */, ].
                concat(initiators)]
@@ -82,6 +83,8 @@ function sendData(ev) {
 }
 
 var description;
+var connectBtn;
+var disconnectBtn;
 if((col = $("#tblMainProp tr"))) {
     var row = elementWithStyle("td", "padding-right: 10px;");
     var title = elementWithStyle("div", "padding-bottom: 5px;");
@@ -118,10 +121,12 @@ if((col = $("#tblMainProp tr"))) {
     connectBtn.addEventListener("click", handleAuthClick);
     row.appendChild(connectBtn);
 
+    disconnectBtn = btn("התנתק");
+    disconnectBtn.id = "gSignoutBtn";
+    disconnectBtn.addEventListener("click", handleSignoutClick);
+    row.appendChild(disconnectBtn);
+
     col.append(row)
-} else {
-    //console.log(table);
-    console.log(col);
 }
 
 document.body.appendChild(function(){
@@ -140,8 +145,6 @@ var DISCOVERY_DOCS = ["https://sheets.googleapis.com/$discovery/rest?version=v4"
 // Authorization scopes required by the API; multiple scopes can be
 // included, separated by spaces.
 var SCOPES = "https://www.googleapis.com/auth/spreadsheets";
-
-var authorizeButton = document.getElementById('gSigninBtn');
 
 /**
        *  On load, called to load the auth2 library and API client library.
@@ -167,7 +170,6 @@ function initClient() {
 
         // Handle the initial sign-in state.
         updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-        authorizeButton.onclick = handleAuthClick;
     }, function(error) {
         appendPre(JSON.stringify(error, null, 2));
         //    setTimeout(handleClientLoad, 2000);
@@ -181,9 +183,17 @@ function initClient() {
        */
 function updateSigninStatus(isSignedIn) {
     if (isSignedIn) {
-        authorizeButton.style.display = 'none';
+        connectBtn.style.display = 'none';
+		disconnectBtn.style.display = 'block';
+		try {
+			var userMail = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail();
+			disconnectBtn.innerHTML = "התנתק מ" + userMail;
+		} catch(e) {
+			appendPre(e);
+		}
     } else {
-        authorizeButton.style.display = 'block';
+        connectBtn.style.display = 'block';
+		disconnectBtn.style.display = 'none';
     }
 }
 
