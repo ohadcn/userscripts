@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           Knesset Agendas Editor Addon
 // @description    Help Knesset Agendas Editors And Reviewers
-// @version        1
+// @version        1.1
 // @namespace      ohadcn
 // @author         Ohad Cohen
 // @match          https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx*
@@ -139,7 +139,7 @@ var DISCOVERY_DOCS = ["https://sheets.googleapis.com/$discovery/rest?version=v4"
 
 // Authorization scopes required by the API; multiple scopes can be
 // included, separated by spaces.
-var SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly";
+var SCOPES = "https://www.googleapis.com/auth/spreadsheets";
 
 var authorizeButton = document.getElementById('gSigninBtn');
 
