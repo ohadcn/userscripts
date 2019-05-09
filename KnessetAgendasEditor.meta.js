@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           Knesset Agendas Editor Addon
 // @description    Help Knesset Agendas Editors And Reviewers
-// @version        1.2
+// @version        1.3
 // @namespace      ohadcn
 // @author         Ohad Cohen
 // @match          https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx*

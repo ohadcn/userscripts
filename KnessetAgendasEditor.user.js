@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           Knesset Agendas Editor Addon
 // @description    Help Knesset Agendas Editors And Reviewers
-// @version        1.2
+// @version        1.3
 // @namespace      ohadcn
 // @author         Ohad Cohen
 // @match          https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx*
@@ -28,6 +28,9 @@ if ('undefined' == typeof __PAGE_SCOPE_RUN__) {
     return;
 }
 
+
+var spreadsheetId = '1c4PDTmDIn2M2tsSjK9LbrtXlhbHhRowdAMJk9aAHID8';
+
 function valElement(value, content) {
     var ret = document.createElement("option");
     ret.innerText = content;
@@ -46,6 +49,7 @@ const hideBtn = "display: none;";
 
 var choose;
 var sendBtn;
+var userMail = "anonymous";
 function btn(text, style) {
     var ret = document.createElement("button")
     ret.innerText = text;
@@ -64,11 +68,11 @@ function sendData(ev) {
     alert("בחר דירוג מספרי!");
     return;
   }
-  gapi.client.sheets.spreadsheets.values.append({
-    spreadsheetId: '1c4PDTmDIn2M2tsSjK9LbrtXlhbHhRowdAMJk9aAHID8',
-    range: 'laws!A2',
+  gapi.client.sheets.spreadsheets.values.update({
+    spreadsheetId: spreadsheetId,
+    range: 'laws' + (Number(billNum.split("/")[2])) + '!A' + (Number(billNum.split("/")[1])+1),
     resource: {
-      values: [[lawName, billNum, derug,
+      values: [[lawName, userMail, billNum, derug,
                 location.href, description.value,
                 /* comment */, /* is voted? */,/* is passed? */, ].
                concat(initiators)]
@@ -132,7 +136,6 @@ if((col = $("#tblMainProp tr"))) {
 document.body.appendChild(function(){
     var ret = document.createElement("pre");
     ret.id="content";
-
     return ret;
 }());
 var CLIENT_ID = '184591434170-99oska8ospn9t3g15as7atcv22khsmd6.apps.googleusercontent.com';
@@ -184,16 +187,25 @@ function initClient() {
 function updateSigninStatus(isSignedIn) {
     if (isSignedIn) {
         connectBtn.style.display = 'none';
-		disconnectBtn.style.display = 'block';
-		try {
-			var userMail = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail();
-			disconnectBtn.innerHTML = "התנתק מ" + userMail;
-		} catch(e) {
-			appendPre(e);
-		}
+    		disconnectBtn.style.display = 'block';
+		    try {
+			      userMail = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail();
+			      disconnectBtn.innerHTML = "התנתק מ" + userMail;
+		    } catch(e) {
+			      appendPre(e);
+		    }
+        var billNum = $("strong:contains(מספר הצ\"ח)").parent().next().text().trim().split("/");
+        var billN = Number(billNum[1]) + 1;
+        gapi.client.sheets.spreadsheets.values.batchGet({spreadsheetId: spreadsheetId, ranges: "laws" + billNum[2] + "!D" + billN + ":F" + billN})
+          .then(function(res){
+              console.log(res);
+              $("#derug").val(res.result.valueRanges[0].values[0][0]);
+              description.value = res.result.valueRanges[0].values[0][2]
+              
+          })
     } else {
         connectBtn.style.display = 'block';
-		disconnectBtn.style.display = 'none';
+        disconnectBtn.style.display = 'none';
     }
 }
 
