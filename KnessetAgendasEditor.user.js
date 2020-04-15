@@ -29,7 +29,7 @@ if ('undefined' == typeof __PAGE_SCOPE_RUN__) {
 }
 
 
-var spreadsheetId = '1c4PDTmDIn2M2tsSjK9LbrtXlhbHhRowdAMJk9aAHID8';
+var spreadsheetId = '1M27pElC1d9yklAp--wsow2LotfgkRvVV0PTr64oB9Xk';
 
 function valElement(value, content) {
     var ret = document.createElement("option");
@@ -54,7 +54,7 @@ function btn(text, style) {
     var ret = document.createElement("button")
     ret.innerText = text;
     ret.style = showBtn;
-	ret.classList.add("btn");
+    ret.classList.add("btn");
     return ret;
 }
 
@@ -120,6 +120,7 @@ if((col = $("#tblMainProp tr"))) {
     sendBtn = btn("שלח");
     sendData.id = "sendBtn";
     sendBtn.addEventListener("click", sendData);
+
 	sendBtn.classList.add("btn-success");
 	sendBtn.classList.add("btn-sm");
     row.appendChild(sendBtn);
@@ -208,6 +209,7 @@ function updateSigninStatus(isSignedIn) {
         var billN = Number(billNum[1]) + 1;
         gapi.client.sheets.spreadsheets.values.batchGet({spreadsheetId: spreadsheetId, ranges: "laws" + billNum[2] + "!D" + billN + ":F" + billN})
           .then(function(res){
+              //console.log(res);
               $("#derug").val(res.result.valueRanges[0].values[0][0]);
               description.value = res.result.valueRanges[0].values[0][2]
               
