@@ -54,6 +54,7 @@ function btn(text, style) {
     var ret = document.createElement("button")
     ret.innerText = text;
     ret.style = showBtn;
+	ret.classList.add("btn");
     return ret;
 }
 
@@ -103,6 +104,7 @@ if((col = $("#tblMainProp tr"))) {
     row.appendChild(description);
 
     choose = document.createElement("select");
+	choose.dir="ltr";
     choose.autofocus = true;
     choose.id = "derug";
     choose.appendChild(valElement("-100", "בחר"));
@@ -118,16 +120,21 @@ if((col = $("#tblMainProp tr"))) {
     sendBtn = btn("שלח");
     sendData.id = "sendBtn";
     sendBtn.addEventListener("click", sendData);
+	sendBtn.classList.add("btn-success");
+	sendBtn.classList.add("btn-sm");
     row.appendChild(sendBtn);
 
     connectBtn = btn("התחבר");
     connectBtn.id = "gSigninBtn";
     connectBtn.addEventListener("click", handleAuthClick);
+	connectBtn.classList.add("btn-success");
     row.appendChild(connectBtn);
 
     disconnectBtn = btn("התנתק");
     disconnectBtn.id = "gSignoutBtn";
     disconnectBtn.addEventListener("click", handleSignoutClick);
+	disconnectBtn.classList.add("btn-danger");
+	disconnectBtn.classList.add("btn-sm");
     row.appendChild(disconnectBtn);
 
     col.append(row)
@@ -138,6 +145,9 @@ document.body.appendChild(function(){
     ret.id="content";
     return ret;
 }());
+
+
+
 var CLIENT_ID = '184591434170-99oska8ospn9t3g15as7atcv22khsmd6.apps.googleusercontent.com';
 var APP_SECRET = 'FEwu9p-2mDrIc8xQLfRKklc_';
 var API_KEY = "AIzaSyCE9rlriVuO7FZsFFw9OYHmJtEcjv8gjdo";
@@ -198,7 +208,6 @@ function updateSigninStatus(isSignedIn) {
         var billN = Number(billNum[1]) + 1;
         gapi.client.sheets.spreadsheets.values.batchGet({spreadsheetId: spreadsheetId, ranges: "laws" + billNum[2] + "!D" + billN + ":F" + billN})
           .then(function(res){
-              console.log(res);
               $("#derug").val(res.result.valueRanges[0].values[0][0]);
               description.value = res.result.valueRanges[0].values[0][2]
               
