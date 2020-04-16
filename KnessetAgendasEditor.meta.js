@@ -1,8 +1,10 @@
 // ==UserScript==
 // @name           Knesset Agendas Editor Addon
+// @name:he        עורכי מדד החירות
 // @description    Help Knesset Agendas Editors And Reviewers
-// @version        1.3
-// @namespace      ohadcn
+// @description:he סקריפט עזר למדרגי חוקים עבור מדד החרות.
+// @version        1.4
+// @namespace      ohadcn-kneset-agendas
 // @author         Ohad Cohen
 // @match          https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx*
 // @grant          GM_xmlhttpRequest
