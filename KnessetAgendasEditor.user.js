@@ -3,7 +3,7 @@
 // @name:he        עורכי מדד החירות
 // @description    Help Knesset Agendas Editors And Reviewers
 // @description:he סקריפט עזר למדרגי חוקים עבור מדד החרות.
-// @version        1.4
+// @version        1.4.2
 // @namespace      ohadcn-kneset-agendas
 // @author         Ohad Cohen
 // @match          https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx*
@@ -67,7 +67,8 @@ function sendData(ev) {
     var lawName = $(".LawDarkBrownTitleH2").text();
     var billNum = $("strong:contains(מספר הצ\"ח)").parent().next().text().trim();
     var derug = $("#derug").val();
-    var initiators = $("strong:contains(חברי הכנסת היוזמים)").parent().parent().next().text().trim().split(", ");
+    var initiators = $("strong:contains(חברי הכנסת היוזמים)").parent().parent().next().text().trim().split(", ")
+		.concat($("strong:contains(חברי הכנסת המצטרפים)").parent().parent().next().text().trim().split(", "));
     if (derug < -50) {
         alert("בחר דירוג מספרי!");
         return;
@@ -98,7 +99,7 @@ function sendData(ev) {
             if (res.error)
                 text = res.error;
             sendBtn.innerText = text;
-        });
+        }).catch((err)=>{console.error(err); $("#gSignoutBtn").parent().append(document.createTextNode(err.body))});
 }
 
 var description;
