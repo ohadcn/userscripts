@@ -3,10 +3,10 @@
 // @name:he        עורכי מדד החירות
 // @description    Help Knesset Agendas Editors And Reviewers
 // @description:he סקריפט עזר למדרגי חוקים עבור מדד החרות.
-// @version        1.4.2
+// @version        1.4.3
 // @namespace      ohadcn-kneset-agendas
 // @author         Ohad Cohen
-// @match          https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx*
+// @include          https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx*
 // @grant          GM_xmlhttpRequest
 // @updateURL      https://raw.githubusercontent.com/ohadcn/userscripts/master/KnessetAgendasEditor.meta.js
 // @downloadURL    https://raw.githubusercontent.com/ohadcn/userscripts/master/KnessetAgendasEditor.user.js
@@ -68,7 +68,7 @@ function sendData(ev) {
     var billNum = $("strong:contains(מספר הצ\"ח)").parent().next().text().trim();
     var derug = $("#derug").val();
     var initiators = $("strong:contains(חברי הכנסת היוזמים)").parent().parent().next().text().trim().split(", ")
-		.concat($("strong:contains(חברי הכנסת המצטרפים)").parent().parent().next().text().trim().split(", "));
+        .concat($("strong:contains(חברי הכנסת המצטרפים)").parent().parent().next().text().trim().split(", "));
     if (derug < -50) {
         alert("בחר דירוג מספרי!");
         return;
@@ -80,26 +80,26 @@ function sendData(ev) {
         initiators = ["ממשלתית"];
     }
     gapi.client.sheets.spreadsheets.values.update({
-            spreadsheetId: spreadsheetId,
-            range: 'laws' + (Number(billNum.split("/")[2])) + '!A' + (Number(billNum.split("/")[1]) + 1),
-            resource: {
-                values: [
-                    [lawName, userMail, billNum, derug,
-                        location.href, description.value,
-                        /* comment */
-                        , /* is voted? */ , /* is passed? */ ,
-                    ].
+        spreadsheetId: spreadsheetId,
+        range: 'laws' + (Number(billNum.split("/")[2])) + '!A' + (Number(billNum.split("/")[1]) + 1),
+        resource: {
+            values: [
+                [lawName, userMail, billNum, derug,
+                    location.href, description.value,
+                    /* comment */
+                    , /* is voted? */, /* is passed? */,
+                ].
                     concat(initiators)
-                ]
-            },
-            valueInputOption: "USER_ENTERED"
-        })
+            ]
+        },
+        valueInputOption: "USER_ENTERED"
+    })
         .then(function (res) {
             var text = "נשלח";
             if (res.error)
                 text = res.error;
             sendBtn.innerText = text;
-        }).catch((err)=>{console.error(err); $("#gSignoutBtn").parent().append(document.createTextNode(err.body))});
+        }).catch((err) => { console.error(err); $("#gSignoutBtn").parent().append(document.createTextNode(err.body)) });
 }
 
 var description;
@@ -228,9 +228,9 @@ function updateSigninStatus(isSignedIn) {
         }
         var billN = Number(billNum[1]) + 1;
         gapi.client.sheets.spreadsheets.values.batchGet({
-                spreadsheetId: spreadsheetId,
-                ranges: "laws" + billNum[2] + "!D" + billN + ":F" + billN
-            })
+            spreadsheetId: spreadsheetId,
+            ranges: "laws" + billNum[2] + "!D" + billN + ":F" + billN
+        })
             .then(function (res) {
                 //console.log(res);
                 $("#derug").val(res.result.valueRanges[0].values[0][0]);
