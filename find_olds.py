@@ -41,14 +41,14 @@ for law in get_laws():
 
 print(str(len(laws)) + " laws loaded")
 
-dups=compile("פ/[0-9]+/22")
+dups=compile("(פ/[0-9]+/2(1|3|2))")
 init = compile("יוז(מות|מים|מת|ם):\t? +חבר(ות|י|ת)? הכנסת\t")
 
 scored_laws = {}
 for name in ["laws21", "laws22"]:
 	dict = DictReader(open(name+ ".csv", "rt"))
 	for line in dict:
-		if line.get("מספר חוק") and line.get("ניקוד לחוק"):
+		if line.get("מספר חוק") and line.get("ניקוד לחוק") != None:
 			scored_laws[line["מספר חוק"]] = line
 
 scores = [['"שם הצעת החוק","מדרג","מספר חוק",ניקוד", "קישור להצעת החוק", "הסבר הדירוג","הערות אחרות","הגיע להצבעה?","עבר?","יוזם ראשון","חתומים"']] + [[]] * 3000
@@ -56,7 +56,7 @@ n = 1
 for line in DictReader(open("laws23" + ".csv", "rt")):
 	if not line.get("מספר חוק"):
 		line["מספר חוק"] = ("פ/" + str(n) + "/23")
-	if not line.get("מדרג") and line.get("הסבר הדירוג").find("ראה חוק") > 0:
+	if line.get("הסבר הדירוג").find("ראה חוק") > 0 and not line.get("מדרג") :
 		line["מדרג"] = "dup_laws_bot"
 	scores[int(line.get("מספר חוק")[int(line.get("מספר חוק").find("/"))+1:int(line.get("מספר חוק").rfind("/"))])] = [
 		"\"" + line.get("שם הצעת החוק") + "\"", line.get("מדרג"), line.get("מספר חוק"),
@@ -71,7 +71,7 @@ duplicates = {}
 laws_initiators = [[]]*3000
 
 news_csv = 'קישור, שם, מספר\n'
-unscored_csv = 'קישור, שם, מספר\n'
+unscored_csv = 'קישור, שם, מספר, עלה להצבעה\n'
 old_csv = 'קישור, שם, מספר חדש, דירוג, מספר קודם\n'
 
 i = 0
@@ -148,13 +148,14 @@ for doc in get_docs():
 	#print(doc["GroupTypeDesc"], doc["FilePath"])
 	for p in get_doc(doc["FilePath"]).paragraphs:
 		if init.match(p.text): #.find("יוזמים:      חברי הכנסת") == 0:
-			initiators = [a.strip() for a in init.sub("", p.text).split("\n")]
+			initiators = [a.strip() for a in init.sub("", p.text).replace("_", "").split("\n")]
 			initiators = [a for a in initiators if a]
 			laws_initiators[num] = initiators
 			scores[num][9:] = initiators
 
-		if p.text.find("חוק") > 0 and (p.text.find("/22") > 0 or p.text.find("/23") > 0 or p.text.find("/21") > 0) and (p.text.find("זהות")>0 or p.text.find("זהה")>0):
-			old_names = dups.findall(p.text)
+		other_names = [i[0] for i in dups.findall(p.text)]
+		if p.text.find("חוק") > 0 and other_names and (p.text.find("זהות")>=0 or p.text.find("זהה")>=0):
+			old_names = other_names
 			for name in old_names:
 				if scored_laws.get(name):
 					if scored_laws[name]["שם הצעת החוק"].find(law['Name'][10:20]) == -1:
@@ -165,16 +166,17 @@ for doc in get_docs():
 							print("חוק דורג פעמיים בעבר בניקוד שונה", law["Name"], scored_laws[name]["ניקוד לחוק"], scored_laws[name]["מספר חוק"], duplicates[law_name]["ניקוד לחוק"], duplicates[law_name]["מספר חוק"])
 					duplicates[law_name] = scored_laws[name]
 					old_csv += ('https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx?t=lawsuggestionssearch&lawitemid=' + law["BillID"] + ",\"" + law['Name'].replace("\"", "'") + "\"," + law_name + "," + scored_laws[name]["ניקוד לחוק"] + "," + scored_laws[name]["מספר חוק"] + "\n")
-					if not scores[int(law_name[5:])][3]:
+					if not scores[int(law_name[5:])][3] and scored_laws[name]["ניקוד לחוק"] != "":
 						scores[int(law_name[5:])][1:6] = ["dup_laws_bot", law_name, 
 							scored_laws[name]["ניקוד לחוק"],'https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx?t=lawsuggestionssearch&lawitemid=' + law["BillID"],
-							"\"" + (scored_laws[name]["הסבר הדירוג"] + " ראה חוק " + scored_laws[name]["מספר חוק"] + " " + scored_laws[name]["קישור להצעה"]).replace("\"", "'") + "\""]
+							"\"" + (scored_laws[name]["הסבר הדירוג"] + " ראה חוק\n" + scored_laws[name]["מספר חוק"] + " " + scored_laws[name]["קישור להצעה"]).replace("\"", "'") + "\""]
+
 	if not old_names:
 		news_csv += ('https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx?t=lawsuggestionssearch&lawitemid=' + law["BillID"] + ",\"" + law['Name'].replace("\"", "'") + "\"," + law_name + "\n")
 		if scored_laws.get(name) == None and scores[num][3] == "":
-			unscored_csv += ('https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx?t=lawsuggestionssearch&lawitemid=' + law["BillID"] + ",\"" + law['Name'].replace("\"", "'") + "\"," + law_name + "\n")
+			unscored_csv += ('https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx?t=lawsuggestionssearch&lawitemid=' + law["BillID"] + ",\"" + law['Name'].replace("\"", "'") + "\"," + law_name + "," + scores[num][7] + "\n")
 	if not scores[num][9]:
-		print([p.text for p in get_doc(doc["FilePath"]).paragraphs])
+		print("no iniitiators", [p.text for p in get_doc(doc["FilePath"]).paragraphs])
 open("unscored_laws.csv", "wt").write(unscored_csv)
 open("new_laws.csv", "wt").write(news_csv)
 open("scored_laws.csv", "wt").write(old_csv)
