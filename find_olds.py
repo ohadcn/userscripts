@@ -5,7 +5,17 @@ def excepthook(type, value, tb):
 import sys
 sys.excepthook = excepthook
 
-from requests import get
+try:
+	from requests import get
+	from docx import Document
+except:
+	from subprocess import check_call
+	from sys import executable
+	for package in ["requests", "python-docx"]:
+		check_call([executable, "-m", "pip", "install", package])
+	from requests import get
+	from docx import Document
+
 from csv import DictReader
 from os import chdir
 from os.path import isfile, join as pathJoin
