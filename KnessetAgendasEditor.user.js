@@ -3,7 +3,7 @@
 // @name:he        עורכי מדד החירות
 // @description    Help Knesset Agendas Editors And Reviewers
 // @description:he סקריפט עזר למדרגי חוקים עבור מדד החרות.
-// @version        1.4.3
+// @version        1.4.4
 // @namespace      ohadcn-kneset-agendas
 // @author         Ohad Cohen
 // @include          https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx*
@@ -233,8 +233,8 @@ function updateSigninStatus(isSignedIn) {
         })
             .then(function (res) {
                 //console.log(res);
-                $("#derug").val(res.result.valueRanges[0].values[0][0]);
-                description.value = res.result.valueRanges[0].values[0][2]
+                $("#derug").val(res.result.valueRanges[0].values[0][0]) || -100;
+                description.value = res.result.valueRanges[0].values[0][2] || "";
 
             })
     } else {
