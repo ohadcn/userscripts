@@ -18,8 +18,9 @@ except:
 
 from csv import DictReader
 from os import chdir, environ, stat, remove
+# environ["PYTHONIOENCODING"] = "utf-8"
 from os.path import isfile, join as pathJoin
-from docx import Document
+
 from re import compile
 from tempfile import gettempdir
 from datetime import datetime
@@ -33,7 +34,7 @@ def get_csv(url):
 	if not isfile(filename) or now - stat(filename).st_mtime > 60 * 60 :
 		print("downloading " + url)
 		file_csv = get(url)
-		print(str(len(file_csv.text)) + " downloaded to " + filename)
+		# print(str(len(file_csv.text)) + " downloaded to " + filename)
 		open(filename, "wt").write(file_csv.text)
 	return DictReader(open(filename, "rt"))
 
@@ -69,7 +70,7 @@ print(str(len(laws)) + " laws loaded")
 
 dups=compile("(פ/[0-9]+/2(1|3|2))")
 init = compile("יוז(מות|מים|מת|ם):\t? +חבר(ות|י|ת)? הכנסת\t")
-
+numbers = compile("[\d]+")
 scored_laws = {}
 for name in ["laws21", "laws22"]:
 	dict = DictReader(open(name+ ".csv", "rt"))
@@ -77,16 +78,17 @@ for name in ["laws21", "laws22"]:
 		if line.get("מספר חוק") and line.get("ניקוד לחוק") != None:
 			scored_laws[line["מספר חוק"]] = line
 
-scores = [['"שם הצעת החוק","מדרג","מספר חוק",ניקוד", "קישור להצעת החוק", "הסבר הדירוג","הערות אחרות","הגיע להצבעה?","עבר?","יוזם ראשון","חתומים"']] + [[]] * 3000
+scores = [['"שם הצעת החוק","מדרג","מספר חוק","ניקוד", "קישור להצעת החוק", "הסבר הדירוג","הערות אחרות","הגיע להצבעה?","עבר?","יוזם ראשון","חתומים"']] + [[]] * 3000
 n = 1
 for line in DictReader(open("laws23" + ".csv", "rt")):
 	if not line.get("מספר חוק"):
 		line["מספר חוק"] = ("פ/" + str(n) + "/23")
 	if line.get("הסבר הדירוג").find("ראה חוק") > 0 and not line.get("מדרג") :
 		line["מדרג"] = "dup_laws_bot"
-	scores[int(line.get("מספר חוק")[int(line.get("מספר חוק").find("/"))+1:int(line.get("מספר חוק").rfind("/"))])] = [
+	# print(line)
+	scores[n] = [
 		"\"" + line.get("שם הצעת החוק") + "\"", line.get("מדרג"), line.get("מספר חוק"),
-		line.get("ניקוד לחוק"),line.get("קישור להצעה"),"\""+line.get("הסבר הדירוג").replace("\"", "'")+"\"",
+		line.get("ניקוד לחוק") or line.get("ניקוד"),line.get("קישור להצעה"),"\""+line.get("הסבר הדירוג").replace("\"", "'")+"\"",
 		line.get("הערות אחרות"),line.get("הגיע להצבעה?"),line.get("עבר?"),line.get("יוזם ראשון"),line.get("חתומים")]
 	n+=1
 	if line.get("ניקוד לחוק") != None:
@@ -100,7 +102,9 @@ news_csv = 'קישור, שם, מספר\n'
 unscored_csv = 'קישור, שם, מספר, עלה להצבעה\n'
 old_csv = 'קישור, שם, מספר חדש, דירוג, מספר קודם\n'
 
+split_initiators = compile("[\n\t]")
 i = 0
+laws_last = 0
 for doc in get_docs():
 	i += 1
 	# if i%1000 == 0:
@@ -121,7 +125,7 @@ for doc in get_docs():
 	# 55 - ועדה
 	if law["SubTypeID"] != '54':
 		if law["SubTypeID"] not in ["53", "54", "55"]:
-			print(law["SubTypeID"], law["SubTypeDesc"])
+			print("unknown law type", law["SubTypeID"], law["SubTypeDesc"])
 		continue
 	
 	# 1 - דיון מוקדם
@@ -133,15 +137,17 @@ for doc in get_docs():
 	# 17 - החלטת ממשלה
 	# 46 - הצעת חוק לקריאה השנייה והשלישית - הנחה מחדש
 	# 51 - הצעת חוק לדיון מוקדם - נוסח מתוקן
+	# 59 - חומר רקע
 	# 101 - הצעת חוק לקריאה השניה והשלישית - פונצ  בננה
 	# 102 - הצעת חוק לקריאה השניה והשלישית - לוח תיקונים - פונצ בננה
 	# 103 - הצעת חוק לקריאה השנייה והשלישית - הנחה מחדש- פונצ בננה
 	if doc["GroupTypeID"] != '1':
-		if doc["GroupTypeID"] not in ['51', "1", "2", "4", "5", "8", "9", "17", "46", "101", "102", "103",]:
-			print(doc["GroupTypeID"], doc["GroupTypeDesc"])
+		if doc["GroupTypeID"] not in ['51', "1", "2", "4", "5", "8", "9", "17", "46", "59", "101", "102", "103",]:
+			print("unknown doc type", doc["GroupTypeID"], doc["GroupTypeDesc"])
 		continue
 	
 	num = int(law["PrivateNumber"])
+	laws_last += 1
 	law_name = "פ\\23\\{}".format(num)
 	if not scores[num]:
 		scores[num] = ["\"" + law["Name"].replace("\"", "'") + "\""] + [''] * 8
@@ -174,7 +180,7 @@ for doc in get_docs():
 	#print(doc["GroupTypeDesc"], doc["FilePath"])
 	for p in get_doc(doc["FilePath"]).paragraphs:
 		if init.match(p.text): #.find("יוזמים:      חברי הכנסת") == 0:
-			initiators = [a.strip() for a in init.sub("", p.text).replace("_", "").split("\n")]
+			initiators = [a.strip() for a in split_initiators.split(init.sub("", p.text).replace("_", ""))]
 			initiators = [a for a in initiators if a]
 			laws_initiators[num] = initiators
 			scores[num][9:] = initiators
@@ -203,8 +209,12 @@ for doc in get_docs():
 			unscored_csv += ('https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx?t=lawsuggestionssearch&lawitemid=' + law["BillID"] + ",\"" + law['Name'].replace("\"", "'") + "\"," + law_name + "," + scores[num][7] + "\n")
 	if not scores[num][9]:
 		print("no iniitiators", [p.text for p in get_doc(doc["FilePath"]).paragraphs])
+
+print(laws_last, len(scores), "laws")
 open("unscored_laws.csv", "wt").write(unscored_csv)
 open("new_laws.csv", "wt").write(news_csv)
 open("scored_laws.csv", "wt").write(old_csv)
-open("table.csv", "wt").write("\n".join([",".join(line) for line in scores]))
+open("table.csv", "wt").write("\n".join([",".join(line) for line in scores if line]))
 open("initiators.csv", "wt").write("\n".join([",".join(line) for line in laws_initiators]))
+
+input()
