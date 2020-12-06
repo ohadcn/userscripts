@@ -17,19 +17,20 @@ except:
 	from docx import Document
 
 from csv import DictReader
-from os import chdir
+from os import chdir, environ, stat, remove
 from os.path import isfile, join as pathJoin
 from docx import Document
 from re import compile
 from tempfile import gettempdir
-
+from datetime import datetime
 temp_dir = gettempdir()
 
 # chdir(temp_dir)
 
+now = datetime.now().timestamp()
 def get_csv(url):
 	filename = pathJoin(temp_dir, url[url.rfind("/")+1:])
-	if not isfile(filename):
+	if not isfile(filename) or now - stat(filename).st_mtime > 60 * 60 :
 		print("downloading " + url)
 		file_csv = get(url)
 		print(str(len(file_csv.text)) + " downloaded to " + filename)
@@ -42,7 +43,7 @@ def get_laws():
 def get_docs():
 	return get_csv("https://production.oknesset.org/pipelines/data/bills/kns_documentbill/kns_documentbill.csv")
 	
-def get_doc(url):
+def get_doc(url, retry = 1):
 	filename = pathJoin(temp_dir, url[url.rfind("/")+1:])
 	if(not isfile(filename)):
 		print("downloading from " + url + " to " + filename)
@@ -50,7 +51,15 @@ def get_doc(url):
 		#print(str(len(data.text)) + " downloaded from " + url + " to " + filename)
 		#data.raw.decode_content = True
 		open(filename, "wb").write(data.content)
-	return Document(filename)
+	try:
+		return Document(filename)
+	except Exception as e:
+		if retry > 0:
+			print(filename + " failed to open, retrying")
+			remove(filename)
+			return get_doc(url, retry=retry-1)
+		else:
+			raise e
 	
 laws = {}
 for law in get_laws():
