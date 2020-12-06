@@ -1,3 +1,10 @@
+def excepthook(type, value, tb):
+	import traceback
+	traceback.print_exception(type, value, tb)
+	input()
+import sys
+sys.excepthook = excepthook
+
 from requests import get
 from csv import DictReader
 from os import chdir
