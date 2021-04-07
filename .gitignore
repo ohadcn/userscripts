@@ -1,0 +1,9 @@
+unscored_laws*.csv
+new_laws.csv
+scored_laws.csv
+table.csv
+table*.csv
+initiators.csv
+*.log
+*.data
+*.zip
