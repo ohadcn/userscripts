@@ -166,7 +166,6 @@ document.body.appendChild(function () {
 
 var CLIENT_ID = '184591434170-99oska8ospn9t3g15as7atcv22khsmd6.apps.googleusercontent.com';
 var APP_SECRET = 'FEwu9p-2mDrIc8xQLfRKklc_';
-var API_KEY = "AIzaSyCE9rlriVuO7FZsFFw9OYHmJtEcjv8gjdo";
 
 // Array of API discovery doc URLs for APIs used by the quickstart
 var DISCOVERY_DOCS = ["https://sheets.googleapis.com/$discovery/rest?version=v4"];
@@ -188,7 +187,6 @@ function handleClientLoad() {
  */
 function initClient() {
     gapi.client.init({
-        //apiKey: API_KEY,
         clientId: CLIENT_ID,
         appSecret: APP_SECRET,
         discoveryDocs: DISCOVERY_DOCS,

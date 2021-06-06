@@ -82,17 +82,18 @@ for name in ["laws21", "laws22", "laws23"]:
 
 scores = [['"שם הצעת החוק","מדרג","מספר חוק","ניקוד", "קישור להצעת החוק", "הסבר הדירוג","הערות אחרות","הגיע להצבעה?","עבר?","יוזם ראשון","חתומים"']] + [[]] * 3000
 n = 1
-for line in DictReader(open("laws24" + ".csv", "rt")):
-	if line.get("מספר חוק") and not line.get("מספר חוק") in [("פ/" + str(n) + "/23"), ("פ\\" + str(n) + "\\23"), ("פ\\23\\" + str(n))]:
+CURRENT_KNESSET = "24"
+for line in DictReader(open("laws" + CURRENT_KNESSET + ".csv", "rt")):
+	if line.get("מספר חוק") and not line.get("מספר חוק") in [("פ/" + str(n) + "/" + CURRENT_KNESSET), ("פ\\" + str(n) + "\\" + CURRENT_KNESSET), ("פ\\" + CURRENT_KNESSET + "\\" + str(n))]:
 		n+=1
-		if not line.get("מספר חוק") in [("פ/" + str(n) + "/23"), ("פ\\" + str(n) + "\\23"), ("פ\\23\\" + str(n))]:
+		if not line.get("מספר חוק") in [("פ/" + str(n) + "/" + CURRENT_KNESSET), ("פ\\" + str(n) + "\\" + CURRENT_KNESSET), ("פ\\" + CURRENT_KNESSET + "\\" + str(n))]:
 			n-=2
-			if not line.get("מספר חוק") in [("פ/" + str(n) + "/23"), ("פ\\" + str(n) + "\\23"), ("פ\\23\\" + str(n))]:
+			if not line.get("מספר חוק") in [("פ/" + str(n) + "/" + CURRENT_KNESSET), ("פ\\" + str(n) + "\\" + CURRENT_KNESSET), ("פ\\" + CURRENT_KNESSET + "\\" + str(n))]:
 				n+=1
 				print(line.get("מספר חוק"), n, "no match")
 			
 	if not line.get("מספר חוק"):
-		line["מספר חוק"] = ("פ/" + str(n) + "/23")
+		line["מספר חוק"] = ("פ/" + str(n) + "/" + CURRENT_KNESSET)
 	if line.get("הסבר הדירוג").find("ראה חוק") > 0 and not line.get("מדרג") :
 		line["מדרג"] = "dup_laws_bot"
 	# print(line)
@@ -127,7 +128,7 @@ for doc in get_docs():
 		continue
 
 
-	if law["KnessetNum"] != '23':
+	if law["KnessetNum"] != CURRENT_KNESSET:
 		continue
 
 	# 53 - הצעה ממשלתית
@@ -159,7 +160,7 @@ for doc in get_docs():
 	
 	num = int(law["PrivateNumber"])
 	laws_last += 1
-	law_name = "פ\\23\\{}".format(num)
+	law_name = "פ\\" + CURRENT_KNESSET + "\\{}".format(num)
 	if not scores[num]:
 		scores[num] = ["\"" + law["Name"].replace("\"", "'") + "\""] + [''] * 8
 	if not scores[num][2]:
