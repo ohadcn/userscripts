@@ -45,11 +45,11 @@ def get_laws():
 def get_docs():
 	return get_csv("https://production.oknesset.org/pipelines/data/bills/kns_documentbill/kns_documentbill.csv")
 	
-def get_doc(url, retry = 1):
+def get_doc(url, retry = 3):
 	filename = pathJoin(temp_dir, url[url.rfind("/")+1:])
 	if(not isfile(filename)):
 		print("downloading from " + url + " to " + filename)
-		data = get(url)
+		data = get(url)#, verify=False)
 		#print(str(len(data.text)) + " downloaded from " + url + " to " + filename)
 		#data.raw.decode_content = True
 		open(filename, "wb").write(data.content)
@@ -80,7 +80,7 @@ for name in ["laws21", "laws22", "laws23"]:
 		if line.get("מספר חוק") and line.get("ניקוד לחוק") != None:
 			scored_laws[line["מספר חוק"]] = line
 
-scores = [['"שם הצעת החוק","מדרג","מספר חוק","ניקוד", "קישור להצעת החוק", "הסבר הדירוג","הערות אחרות","הגיע להצבעה?","עבר?","יוזם ראשון","חתומים"']] + [[]] * 3000
+scores = [['"שם הצעת החוק","מדרג","מספר חוק","ניקוד", "קישור להצעת החוק", "הסבר הדירוג","הערות אחרות","הגיע להצבעה?","עבר?","יוזם ראשון","חתומים"']] + [[]] * 4000
 n = 1
 CURRENT_KNESSET = "24"
 for line in DictReader(open("laws" + CURRENT_KNESSET + ".csv", "rt")):
@@ -107,7 +107,7 @@ for line in DictReader(open("laws" + CURRENT_KNESSET + ".csv", "rt")):
 	n+=1
 # sys.exit(0)
 duplicates = {}
-laws_initiators = [[]]*3000
+laws_initiators = [[]]*4000
 
 news_csv = 'קישור, שם, מספר\n'
 unscored_csv = 'קישור, שם, מספר, עלה להצבעה\n'
@@ -161,7 +161,7 @@ for doc in get_docs():
 	num = int(law["PrivateNumber"])
 	laws_last += 1
 	law_name = "פ\\" + CURRENT_KNESSET + "\\{}".format(num)
-	if not scores[num]:
+	if len(scores) <= num or not scores[num]:
 		scores[num] = ["\"" + law["Name"].replace("\"", "'") + "\""] + [''] * 8
 	if not scores[num][2]:
 		scores[num][2] = law_name
@@ -219,7 +219,7 @@ for doc in get_docs():
 		news_csv += ('https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx?t=lawsuggestionssearch&lawitemid=' + law["BillID"] + ",\"" + law['Name'].replace("\"", "'") + "\"," + law_name + "\n")
 		if scored_laws.get(name) == None and scores[num][3] == "":
 			unscored_csv += ('https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx?t=lawsuggestionssearch&lawitemid=' + law["BillID"] + ",\"" + law['Name'].replace("\"", "'") + "\"," + law_name + "," + scores[num][7] + "\n")
-	if not scores[num][9]:
+	if not scores[num] or len(scores[num]) < 10 or not scores[num][9]:
 		print("no iniitiators", [p.text for p in get_doc(doc["FilePath"]).paragraphs])
 
 print(laws_last, len(scores), "laws")
