@@ -160,7 +160,9 @@ for doc in get_docs():
 	
 	num = int(law["PrivateNumber"])
 	laws_last += 1
-	law_name = "פ\\" + CURRENT_KNESSET + "\\{}".format(num)
+	# if num != laws_last:
+	# 	print(num, laws_last)
+	law_name = "פ\\{}\\{}".format(CURRENT_KNESSET, num)
 	if len(scores) <= num or not scores[num]:
 		scores[num] = ["\"" + law["Name"].replace("\"", "'") + "\""] + [''] * 8
 	if not scores[num][2]:
