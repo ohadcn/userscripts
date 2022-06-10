@@ -70,7 +70,7 @@ for law in get_laws():
 
 print(str(len(laws)) + " laws loaded")
 
-dups=compile("(פ/[0-9]+/2(1|3|2))")
+dups=compile("(פ[/\\\\][0-9]+[/\\\\]2(1|3|4|2))")
 init = compile("יוז(מות|מים|מת|ם):\t? +חבר(ות|י|ת)? הכנסת\t")
 numbers = compile("[\d]+")
 scored_laws = {}
@@ -202,20 +202,23 @@ for doc in get_docs():
 		other_names = [i[0] for i in dups.findall(p.text)]
 		if p.text.find("חוק") > 0 and other_names and (p.text.find("זהות")>=0 or p.text.find("זהה")>=0):
 			old_names = other_names
-			for name in old_names:
-				if scored_laws.get(name):
-					if scored_laws[name]["שם הצעת החוק"].find(law['Name'][10:20]) == -1:
-							print("כפילות בשם שונה!", law['Name'], law_name, scored_laws[name]["שם הצעת החוק"], name)
-					if duplicates.get(law_name):
-						#print("law scored already twice! " + str(scored_laws[name]) + str(duplicates[law_name]))
-						if scored_laws[name]["ניקוד לחוק"] != duplicates[law_name]["ניקוד לחוק"]:
-							print("חוק דורג פעמיים בעבר בניקוד שונה", law["Name"], scored_laws[name]["ניקוד לחוק"], scored_laws[name]["מספר חוק"], duplicates[law_name]["ניקוד לחוק"], duplicates[law_name]["מספר חוק"])
-					duplicates[law_name] = scored_laws[name]
-					old_csv += ('https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx?t=lawsuggestionssearch&lawitemid=' + law["BillID"] + ",\"" + law['Name'].replace("\"", "'") + "\"," + law_name + "," + scored_laws[name]["ניקוד לחוק"] + "," + scored_laws[name]["מספר חוק"] + "\n")
-					if not scores[int(law_name[5:])][3] and scored_laws[name]["ניקוד לחוק"] != "":
-						scores[int(law_name[5:])][1:6] = ["dup_laws_bot", law_name, 
-							scored_laws[name]["ניקוד לחוק"],'https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx?t=lawsuggestionssearch&lawitemid=' + law["BillID"],
-							"\"" + (scored_laws[name]["הסבר הדירוג"] + " ראה חוק\n" + scored_laws[name]["מספר חוק"] + " " + scored_laws[name]["קישור להצעה"]).replace("\"", "'") + "\""]
+			for n in old_names:
+				for v in [n, n.replace('/', '\\'), n.replace('\\', '/')]:
+					if scored_laws.get(v):
+						name = v
+						if scored_laws[name]["שם הצעת החוק"].find(law['Name'][10:20]) == -1:
+								print("כפילות בשם שונה!", law['Name'], law_name, scored_laws[name]["שם הצעת החוק"], name)
+						if duplicates.get(law_name):
+							#print("law scored already twice! " + str(scored_laws[name]) + str(duplicates[law_name]))
+							if scored_laws[name]["ניקוד לחוק"] != duplicates[law_name]["ניקוד לחוק"]:
+								print("חוק דורג פעמיים בעבר בניקוד שונה", law["Name"], scored_laws[name]["ניקוד לחוק"], scored_laws[name]["מספר חוק"], duplicates[law_name]["ניקוד לחוק"], duplicates[law_name]["מספר חוק"])
+						duplicates[law_name] = scored_laws[name]
+						old_csv += ('https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx?t=lawsuggestionssearch&lawitemid=' + law["BillID"] + ",\"" + law['Name'].replace("\"", "'") + "\"," + law_name + "," + scored_laws[name]["ניקוד לחוק"] + "," + scored_laws[name]["מספר חוק"] + "\n")
+						if not scores[int(law_name[5:])][3] and scored_laws[name]["ניקוד לחוק"] != "":
+							scores[int(law_name[5:])][1:6] = ["dup_laws_bot", law_name, 
+								scored_laws[name]["ניקוד לחוק"],'https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx?t=lawsuggestionssearch&lawitemid=' + law["BillID"],
+								"\"" + (scored_laws[name]["הסבר הדירוג"] + " ראה חוק\n" + scored_laws[name]["מספר חוק"] + " " + scored_laws[name]["קישור להצעה"]).replace("\"", "'") + "\""]
+						break
 
 	if not old_names:
 		news_csv += ('https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx?t=lawsuggestionssearch&lawitemid=' + law["BillID"] + ",\"" + law['Name'].replace("\"", "'") + "\"," + law_name + "\n")
