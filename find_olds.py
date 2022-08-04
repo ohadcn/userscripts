@@ -80,7 +80,7 @@ for name in ["laws21", "laws22", "laws23"]:
 		if line.get("מספר חוק") and line.get("ניקוד לחוק") != None:
 			scored_laws[line["מספר חוק"]] = line
 
-scores = [['"שם הצעת החוק","מדרג","מספר חוק","ניקוד", "קישור להצעת החוק", "הסבר הדירוג","הערות אחרות","הגיע להצבעה?","עבר?","יוזם ראשון","חתומים"']] + [[]] * 4000
+scores = [['"שם הצעת החוק","מדרג","מספר חוק","ניקוד", "קישור להצעת החוק", "הסבר הדירוג","הערות אחרות","הגיע להצבעה?","עבר?","יוזם ראשון","חתומים"']] + [[]] * 5000
 n = 1
 CURRENT_KNESSET = "24"
 for line in DictReader(open("laws" + CURRENT_KNESSET + ".csv", "rt")):
@@ -107,7 +107,7 @@ for line in DictReader(open("laws" + CURRENT_KNESSET + ".csv", "rt")):
 	n+=1
 # sys.exit(0)
 duplicates = {}
-laws_initiators = [[]]*4000
+laws_initiators = [[]]*5000
 
 news_csv = 'קישור, שם, מספר\n'
 unscored_csv = 'קישור, שם, מספר, עלה להצבעה\n'
@@ -145,6 +145,7 @@ for doc in get_docs():
 	# 5 - הצעת חוק לקריאה השנייה והשלישית - לוח תיקונים
 	# 8 - חוק - נוסח לא רשמי
 	# 9 - חוק - פרסום ברשומות
+	# 12 - מסמך מ.מ.מ
 	# 17 - החלטת ממשלה
 	# 46 - הצעת חוק לקריאה השנייה והשלישית - הנחה מחדש
 	# 51 - הצעת חוק לדיון מוקדם - נוסח מתוקן
@@ -154,7 +155,7 @@ for doc in get_docs():
 	# 102 - הצעת חוק לקריאה השניה והשלישית - לוח תיקונים - פונצ בננה
 	# 103 - הצעת חוק לקריאה השנייה והשלישית - הנחה מחדש- פונצ בננה
 	if doc["GroupTypeID"] != '1':
-		if doc["GroupTypeID"] not in ['51', "1", "2", "4", "5", "8", "9", "17", "46", "56", "59", "101", "102", "103",]:
+		if doc["GroupTypeID"] not in ['51', "1", "2", "4", "5", "8", "9", "17", "46", "56", "59", "101", "102", "103", "12"]:
 			print("unknown doc type", doc["GroupTypeID"], doc["GroupTypeDesc"])
 		continue
 	
@@ -206,11 +207,11 @@ for doc in get_docs():
 				for v in [n, n.replace('/', '\\'), n.replace('\\', '/')]:
 					if scored_laws.get(v):
 						name = v
-						if scored_laws[name]["שם הצעת החוק"].find(law['Name'][10:20]) == -1:
+						if scored_laws[name]["שם הצעת החוק"].find(law['Name'][10:20]) == -1 and scored_laws[name]["שם הצעת החוק"].find(law['Name'][20:30]) == -1:
 								print("כפילות בשם שונה!", law['Name'], law_name, scored_laws[name]["שם הצעת החוק"], name)
 						if duplicates.get(law_name):
 							#print("law scored already twice! " + str(scored_laws[name]) + str(duplicates[law_name]))
-							if scored_laws[name]["ניקוד לחוק"] != duplicates[law_name]["ניקוד לחוק"]:
+							if scored_laws[name]["ניקוד לחוק"] and duplicates[law_name]["ניקוד לחוק"] and scored_laws[name]["ניקוד לחוק"] != duplicates[law_name]["ניקוד לחוק"]:
 								print("חוק דורג פעמיים בעבר בניקוד שונה", law["Name"], scored_laws[name]["ניקוד לחוק"], scored_laws[name]["מספר חוק"], duplicates[law_name]["ניקוד לחוק"], duplicates[law_name]["מספר חוק"])
 						duplicates[law_name] = scored_laws[name]
 						old_csv += ('https://main.knesset.gov.il/Activity/Legislation/Laws/Pages/LawBill.aspx?t=lawsuggestionssearch&lawitemid=' + law["BillID"] + ",\"" + law['Name'].replace("\"", "'") + "\"," + law_name + "," + scored_laws[name]["ניקוד לחוק"] + "," + scored_laws[name]["מספר חוק"] + "\n")
